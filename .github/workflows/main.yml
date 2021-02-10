@@ -2,16 +2,18 @@ name: Run PHPUnit testsuite
 
 on: [push, pull_request, workflow_dispatch]
 
+env:
+  PARALLEL_PHPUNIT_TESTS: 4
+  DBTYPE: mysql
+  DBNAME: testwiki
+  MEDIAWIKI_USER: "Moderator User"
+  MEDIAWIKI_PASSWORD: "123456"
+
 jobs:
   phpunit-action:
-    runs-on: ubuntu-20.04
     env:
-      PARALLEL_PHPUNIT_TESTS: 4
-      DBTYPE: mysql
-      DBNAME: testwiki
-      MEDIAWIKI_USER: "Moderator User"
-      MEDIAWIKI_PASSWORD: "123456"
       branch: REL1_35
+    runs-on: ubuntu-20.04
     services:
       memcached:
         image: memcached:latest
@@ -37,9 +39,8 @@ jobs:
           path: |
             ~/.composer/cache
             buildcache
-          key: buildcache-${{ env.branch }}-${{ hashFiles('**/scripts', '**/action.yml') }}
-      - name: Call the "install MediaWiki" action
-        uses: edwardspec/github-action-build-mediawiki@master
+          key: buildcache-${{ env.branch }}-${{ hashFiles('**/no/files/need/to/invalidate/cache/for/now') }}
+      - uses: edwardspec/github-action-build-mediawiki@master
         with:
           branch: ${{ env.branch }}
           extraLocalSettings: tests/travis/ModerationSettings.php
@@ -48,7 +49,7 @@ jobs:
           dbtype: ${{ env.DBTYPE }}
           dbname: ${{ env.DBNAME }}
 
-      - name: Finalize the installation
+      - name: Finalize the installation of MediaWiki
         run: |
           php -i
           cp -fv tests/travis/my.cnf ~/.my.cnf
@@ -56,10 +57,8 @@ jobs:
           cd mediawiki && echo 'DELETE FROM recentchanges;' | php maintenance/sql.php
           WITH_ECHO=1 php maintenance/update.php --quick
           php maintenance/createAndPromote.php "$MEDIAWIKI_USER" "$MEDIAWIKI_PASSWORD" --custom-groups moderator,automoderated
-          cd extensions/Moderation && composer install
-
-      - name: Try running some maintenance script on the newly installed MediaWiki instance
-        run: cd mediawiki && echo '{{CURRENTVERSION}}' | php maintenance/parse.php
+          ( cd extensions/Moderation && composer install )
+          echo '{{CURRENTVERSION}}' | php maintenance/parse.php
 
         # Start by running non-blackbox unit tests that can use temporary DB tables.
         # These tests are much faster than the integration testsuite.
