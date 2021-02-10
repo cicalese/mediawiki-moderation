@@ -10,7 +10,8 @@ env:
   MEDIAWIKI_PASSWORD: "123456"
 
 jobs:
-  phpunit-build:
+  # Job #1: PHPUnit testsuite (unit tests + integration tests)
+  phpunit:
     strategy:
       matrix:
         php: [7.4]
@@ -83,3 +84,49 @@ jobs:
         # Note: test files are sorted by filesize (from smallest to largest).
       - name: Run integration tests
         run: cd mediawiki && find extensions/Moderation/tests/phpunit/{blackbox,decoupled} -name "*Test.php" -exec ls -1Sr {} + | ./extensions/Moderation/vendor/liuggio/fastest/fastest -p "$PARALLEL_PHPUNIT_TESTS" --before="./extensions/Moderation/tests/travis/fastest_init_thread.sh" --preserve-order --verbose "php tests/phpunit/phpunit.php --use-normal-tables --reuse-db {};"
+
+  # Job #2: phpcs, parallel-lint, etc.
+  linter:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: shivammathur/setup-php@v2
+        with:
+            php-version: '7.4'
+            tools: composer:v1
+      - uses: actions/cache@v2
+        with:
+          path: ~/.composer/cache
+          key: composer-cache
+      - run: sudo apt-get install -y composer && composer install
+      - run: composer test
+
+  # Job #3: Phan (PHP static analyzer)
+  phan:
+    runs-on: ubuntu-20.04
+    env:
+      branch: REL1_35
+    steps:
+      - uses: actions/checkout@v2
+      - uses: shivammathur/setup-php@v2
+        with:
+            php-version: '7.4'
+            tools: composer:v1
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.composer/cache
+            buildcache
+          key: buildcache-${{ env.branch }}
+      - run: sudo apt-get install -y composer php-ast
+      - uses: edwardspec/github-action-build-mediawiki@master
+        with:
+          branch: ${{ env.branch }}
+          noinstall: 1
+      - name: Install dependencies
+        run: |
+          rsync -a --exclude buildcache --exclude mediawiki --exclude .git . mediawiki/extensions/Moderation/
+          cd mediawiki/extensions/Moderation
+          composer install
+      - name: RUN -- phan
+        run: cd mediawiki/extensions/Moderation && ./vendor/bin/phan --analyze-twice
