@@ -9,7 +9,6 @@ jobs:
       PARALLEL_PHPUNIT_TESTS: 1
       DBTYPE: mysql
       DBNAME: testwiki
-      DBUSER: root
       MEDIAWIKI_USER: "Moderator User"
       MEDIAWIKI_PASSWORD: "123456"
       branch: REL1_35
@@ -48,11 +47,11 @@ jobs:
           skins: "MinervaNeue"
           dbtype: ${{ env.DBTYPE }}
           dbname: ${{ env.DBNAME }}
-          dbuser: ${{ env.DBUSER }}
 
       - name: Finalize the installation
         run: |
           php -i
+          cp -fv tests/travis/my.cnf ~/.my.cnf
           rsync -a --exclude buildcache --exclude mediawiki --exclude .git . mediawiki/extensions/Moderation/
           cd mediawiki && echo 'DELETE FROM recentchanges;' | php maintenance/sql.php
           WITH_ECHO=1 php maintenance/update.php --quick
