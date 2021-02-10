@@ -45,6 +45,9 @@ wfLoadSkin( 'Vector' );
 $wgMainCacheType = CACHE_MEMCACHED;
 $wgMemCachedServers = [ "127.0.0.1:11211" ];
 
+// DEBUG:
+$wgMessageCacheType = CACHE_DB;
+
 # Don't trigger $wgRateLimits in simultaneous Selenium tests
 $wgGroupPermissions['*']['noratelimit'] = true;
 
