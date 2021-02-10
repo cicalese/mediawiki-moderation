@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       PARALLEL_PHPUNIT_TESTS: 4
+      DBTYPE: mysql
+      DBNAME: testwiki
       MEDIAWIKI_USER: "Moderator User"
       MEDIAWIKI_PASSWORD: "123456"
       branch: REL1_35
@@ -43,6 +45,8 @@ jobs:
           extraLocalSettings: tests/travis/ModerationSettings.php
           extensions: "AbuseFilter CheckUser Echo MobileFrontend PageForms VisualEditor"
           skins: "MinervaNeue"
+          dbtype: ${{ env.DBTYPE }}
+          dbname: ${{ env.DBNAME }}
 
       - name: Finalize the installation
         run: |
@@ -69,4 +73,4 @@ jobs:
         # Run all tests in parallel via Fastest.
         # Note: test files are sorted by filesize (from smallest to largest).
       - name: Run integration tests
-        run: cd mediawiki # && find extensions/Moderation/tests/phpunit/{blackbox,decoupled} -name "*Test.php" -exec ls -1Sr {} + | ./extensions/Moderation/vendor/liuggio/fastest/fastest -p "$PARALLEL_PHPUNIT_TESTS" --before="./extensions/Moderation/tests/travis/fastest_init_thread.sh" --preserve-order --verbose "php tests/phpunit/phpunit.php --use-normal-tables --reuse-db {};"
+        run: cd mediawiki && find extensions/Moderation/tests/phpunit/{blackbox,decoupled} -name "*Test.php" -exec ls -1Sr {} + | ./extensions/Moderation/vendor/liuggio/fastest/fastest -p "$PARALLEL_PHPUNIT_TESTS" --before="./extensions/Moderation/tests/travis/fastest_init_thread.sh" --preserve-order --verbose "php tests/phpunit/phpunit.php --use-normal-tables --reuse-db {};"
