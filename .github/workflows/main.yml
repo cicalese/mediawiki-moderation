@@ -46,6 +46,7 @@ jobs:
 
       - name: Finalize the installation
         run: |
+          php -i
           rsync -a --exclude buildcache --exclude mediawiki --exclude .git . mediawiki/extensions/Moderation/
           cd mediawiki && echo 'DELETE FROM recentchanges;' | php maintenance/sql.php
           WITH_ECHO=1 php maintenance/update.php --quick
