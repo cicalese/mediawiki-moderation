@@ -41,7 +41,7 @@ jobs:
         with:
           branch: ${{ env.branch }}
           extraLocalSettings: tests/travis/ModerationSettings.php
-          extensions: "AbuseFilter CheckUser Echo MobileFrontend PageForms VisualEditor"
+          extensions: "CheckUser Echo MobileFrontend PageForms VisualEditor"
           skins: "MinervaNeue"
 
       - name: Finalize the installation
