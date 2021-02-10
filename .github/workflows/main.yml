@@ -9,11 +9,14 @@ env:
   MEDIAWIKI_USER: "Moderator User"
   MEDIAWIKI_PASSWORD: "123456"
 
+
 jobs:
-  phpunit-REL1_35:
-    &phpunit-build
+  phpunit-build:
+    strategy:
+      matrix:
+        branch: [REL1_35, REL1_31]
     env:
-      branch: REL1_35
+      branch: ${{ matrix.branch }}
     runs-on: ubuntu-20.04
     services:
       memcached:
@@ -75,7 +78,3 @@ jobs:
         # Note: test files are sorted by filesize (from smallest to largest).
       - name: Run integration tests
         run: cd mediawiki && find extensions/Moderation/tests/phpunit/{blackbox,decoupled} -name "*Test.php" -exec ls -1Sr {} + | ./extensions/Moderation/vendor/liuggio/fastest/fastest -p "$PARALLEL_PHPUNIT_TESTS" --before="./extensions/Moderation/tests/travis/fastest_init_thread.sh" --preserve-order --verbose "php tests/phpunit/phpunit.php --use-normal-tables --reuse-db {};"
-  phpunit-REL1_31:
-    <<: *phpunit-build
-    env:
-      branch: REL1_31
