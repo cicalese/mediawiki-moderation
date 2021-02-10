@@ -15,7 +15,7 @@ CLONED_DB_NAME="${ORIGINAL_DB_NAME}_thread${ENV_TEST_CHANNEL}"
 
 # Clone the database (including the initial data, if any).
 if [ "$DBTYPE" = "mysql" ]; then
-	mysql -e "CREATE DATABASE ${CLONED_DB_NAME}"
+	mysql -h 127.0.0.1 -e "CREATE DATABASE ${CLONED_DB_NAME}"
 	mysqldump "${ORIGINAL_DB_NAME}" | mysql -D "${CLONED_DB_NAME}"
 else if [ "$DBTYPE" = "postgres" ]; then
 	echo "CREATE DATABASE ${CLONED_DB_NAME} TEMPLATE ${ORIGINAL_DB_NAME};" | psql -U postgres "${ORIGINAL_DB_NAME}"
