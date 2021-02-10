@@ -51,7 +51,7 @@ jobs:
             ini-values: zend.enable_gc=Off, opcache.enable_cli=1, opcache.file_cache="/dev/shm", opcache.file_cache_only=1, opcache.file_cache_consistency_checks=0, opcache.validate_timestamps=0
       - name: (debug) Print "php -i"
         run: php -i
-      - uses: edwardspec/github-action-build-mediawiki@master
+      - uses: edwardspec/github-action-build-mediawiki@v1
         with:
           branch: ${{ env.branch }}
           extraLocalSettings: tests/travis/ModerationSettings.php
@@ -119,7 +119,7 @@ jobs:
             buildcache
           key: buildcache-${{ env.branch }}
       - run: sudo apt-get install -y composer php-ast
-      - uses: edwardspec/github-action-build-mediawiki@master
+      - uses: edwardspec/github-action-build-mediawiki@v1
         with:
           branch: ${{ env.branch }}
           noinstall: 1
