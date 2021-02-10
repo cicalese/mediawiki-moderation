@@ -45,9 +45,6 @@ wfLoadSkin( 'Vector' );
 $wgMainCacheType = CACHE_MEMCACHED;
 $wgMemCachedServers = [ "127.0.0.1:11211" ];
 
-// DEBUG:
-$wgMessageCacheType = CACHE_DB;
-
 # Don't trigger $wgRateLimits in simultaneous Selenium tests
 $wgGroupPermissions['*']['noratelimit'] = true;
 
@@ -68,7 +65,7 @@ if ( $wgDBtype != 'postgres' ) {
 	// FIXME: what AbuseFilter does in its "UnitTestsAfterDatabaseSetup" and
 	// "UnitTestsBeforeDatabaseTeardown" hooks interferes with CliEngine.
 	// Until a workaround is found, we can't test with it.
-	//wfLoadExtension( 'AbuseFilter' ); # For PHPUnit testsuite
+	wfLoadExtension( 'AbuseFilter' ); # For PHPUnit testsuite
 }
 
 if ( $wgDBtype != 'postgres' ) {
